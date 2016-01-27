@@ -40,7 +40,7 @@ class fullyConectedLayer:
 		self.layer_len = layer_len
 
 		#This atribute is explained in the backward method
-		self.max_weight = 20.0
+		self.max_weight = 2000.0
 		self.min_weight = 0.0
 		self.mid_weight = (self.max_weight - self.min_weight) / 2.0
 
@@ -116,13 +116,12 @@ class fullyConectedLayer:
 			#We want to increase the strength of the weight which connects the spiked input cells to the spiked output cells.
 			#We call this weights active_weights
 			active_weights = self.input[:, None] * self.spiked
-			self.excitatory += (self.max_weight - self.excitatory) * reward  * active_weights
+			self.excitatory += (self.max_weight - self.excitatory) * reward * active_weights
 
 			#We also want to decrease the strenght of the weight which connects to neurons which fired in the input 
 			#to neurons which didn't fired in the output
 			inactive_weights =  self.input[:, None] * (self.spiked == False)
-
-			self.excitatory += (self.min_weight + self.excitatory) * (-1 * reward)  * inactive_weights
+			self.excitatory -= (self.excitatory - self.min_weight) * reward * inactive_weights
 		
 			#When updating the inhibitory weight, we want neurons which succesfully inhibited other neurons to increase it weights,
 			#To make it more probable that it will inhibit them again, but also, we want to decrease weight between neurons which 
@@ -132,13 +131,10 @@ class fullyConectedLayer:
 		if reward < 0.0:
 			#If the reward it's negative, we want to make the weights responsable of firing smaller.We do this proportional to 
 			#the difference to the mimun weight and to the reward
-			#print 'before updating weights with negative reward', self.excitatory
 			active_weights = self.input[:, None] * self.spiked
-
 			self.excitatory += ( self.excitatory - self.min_weight ) * reward * active_weights
 			#self.excitatory =  self.excitatory + (self.max_weight - self.excitatory) * (-1 * reward)  * self.input[:, None] * (self.spiked == False)
 
-			#print 'after updating weights with negative reward', self.excitatory
 		return
 
 class outputLayer:
