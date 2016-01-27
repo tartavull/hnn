@@ -1,1 +1,1 @@
-# nn
+# Hebbian Neural Network
