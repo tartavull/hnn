@@ -103,8 +103,8 @@ class fullyConectedLayer:
 			#We will update it proportionally to the difference to the max weight, this proportionality is set with the reward.
 			#If the reward is 1, our weights will get the self.max_weight in only one run, which is undesired.
 			# print 'before updating weights with positive reward \n', self.excitatory
-			self.excitatory =  self.excitatory + (self.max_weight - self.excitatory) * reward  * self.input[:, None] * self.spiked
-			self.excitatory =  self.excitatory + (self.min_weight + self.excitatory) * (-1 * reward)  * self.input[:, None] * (self.spiked == False)
+			self.excitatory += (self.max_weight - self.excitatory) *  reward * self.input[:, None] * self.spiked
+			self.excitatory += (self.excitatory - self.min_weight) * -reward * self.input[:, None] * (self.spiked == False)
 			# print 'after updating weights with postive reward \n', self.excitatory
 			# print 'with self.spiked = \n' , self.spiked
 
