@@ -1,11 +1,12 @@
 from ma import *
 from tqdm import *
 from sklearn.metrics import classification_report
+from logger import *
 
 
 class Trainer:
 
-	def __init__( self , nn , dataset , moving_average_window = 10 , positive_reward = 1.0 , negative_reward = -1.0):
+	def __init__( self , nn , dataset , log , moving_average_window = 100 , positive_reward = .01 , negative_reward = -.1):
 
 		self.nn = nn
 		self.dataset = dataset
@@ -16,14 +17,14 @@ class Trainer:
 		for label in range(self.number_of_examples):
 			self.ma_success_rate.append(MovingAverage(moving_average_window))
 
+
+
 		self.positive_reward = positive_reward
 		self.negative_reward = negative_reward
 
-		self.debug = True
-		if self.debug:
-			self.actualTargets = []
-			self.desiredTargets = []
-
+		self.log = log
+		if self.log:
+			self.logger = Logger()
 
 
 	def train (self, epochs ):
@@ -32,12 +33,20 @@ class Trainer:
 
 			for example in range( self.number_of_examples ):
 
-				self.processExample( example )
+				desiredTarget, actualTarget = self.processExample( example )
 
+				if actualTarget == None:
+					continue
 
-		if self.debug:
-			self.report()
+				self.updateSucessRate ( desiredTarget , actualTarget )
+				
+				reward = self.getReward( desiredTarget , actualTarget )
 
+				self.nn.backward(reward)
+
+				if self.log and  example == 0:
+					self.logger.logWeight(self.nn.layers[1].excitatory)
+					self.logger.logReward(reward)
 
 	def processExample (self, example ):
 
@@ -46,19 +55,7 @@ class Trainer:
 
 		actualTarget = self.nn.forward( input )
 
-		self.updateSucessRate ( desiredTarget , actualTarget )
-		reward = self.getReward( desiredTarget , actualTarget )
-
-		#print 'desired' ,desiredTarget , 'actual', actualTarget , 'reward', reward
-
-
-		self.nn.backward(reward)
-
-		if self.debug:
-			self.actualTargets.append(actualTarget)
-			self.desiredTargets.append(desiredTarget)
-
-
+		return desiredTarget, actualTarget
 
 	def getTarget( self, example):
 
@@ -71,19 +68,37 @@ class Trainer:
 	def updateSucessRate(self, desiredTarget , actualTarget ):
 
 		if  desiredTarget == actualTarget:
-			self.ma_success_rate[actualTarget].append(1.0)
+			self.ma_success_rate[desiredTarget].append(1.0)
 
 		else :
-			self.ma_success_rate[actualTarget].append(0.0)
+			self.ma_success_rate[desiredTarget].append(0.0)
 
 	def getReward(self, desiredTarget , actualTarget ):
 
 		if desiredTarget == actualTarget:
 			# Positive reward
-		 	return self.positive_reward * (1.0 - self.ma_success_rate[actualTarget].mean) 
+		 	return self.positive_reward * (0.9 *  (1.0 - self.ma_success_rate[desiredTarget].mean) + 0.1) 
 		else:
 			#Negative reward
-			return self.negative_reward *  self.ma_success_rate[actualTarget].mean
+			return self.negative_reward * (0.9 * self.ma_success_rate[desiredTarget].mean + 0.1)
+
+
+	def test(self):
+
+		self.actualTargets = []
+		self.desiredTargets = []
+
+		for epoch in range(100):
+			for example in range( self.number_of_examples ):
+
+				desiredTarget, actualTarget = self.processExample( example )
+				if actualTarget == None:
+					continue
+				
+				self.actualTargets.append(actualTarget)
+				self.desiredTargets.append(desiredTarget)
+
+		self.report()
 
 	def report(self):
 

@@ -18,9 +18,18 @@ def main_train_naive():
 
 	nn = simpleNet( architecture )
 
-	trainer = Trainer ( nn, data )
+	trainer = Trainer ( nn, data , log = True)
 
 	trainer.train(100000)
+
+	nn.temperature = 1.0
+	trainer.test()
+
+	print numpy.round(nn.layers[1].excitatory, decimals=2)
+	print nn.temperature
+	trainer.logger.plot()
+
+	
 	
 
 
