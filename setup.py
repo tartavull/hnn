@@ -15,7 +15,10 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    # TODO: put package requirements here
+   "tqdm>=3.7.1",
+    "scikit-learn>=0.17",
+    "sklearn>=0.0",
+    "scipy>=0.17.0"
 ]
 
 test_requirements = [
