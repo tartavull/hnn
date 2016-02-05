@@ -1,0 +1,17 @@
+sudo: false
+install: pip install tox-travis
+language: python
+python:
+  - "2.7"
+  - "3.4"
+script: tox
+deploy:
+  true:
+    condition: $TOXENV == py27
+    repo: tartavull/hnn
+    tags: true
+  distributions: sdist bdist_wheel
+  password:
+    secure: RhZAhXkibYZOoGbnDWGRxtKr0AA4TQZpq/9FeDpLGmX4tCktZsGp6/g0IXnEmsYrm0UbovZX71djeYajHindgbIAaaaFHoxyMbB0muZZLxYiAIU5uwKmJq/jK2WiDQ4uS6DSp/XTw8ELk3nUSMQqM+E3ZLTS0REkCpyRNssEJWeY41QUxLz0TrsjBHIlU4Z+xq3DMIKPtGIcCkOH7Cg07rP8QeK7WB5jp18bkVdGGV9vHaBXXtblTq/L+gsoQBHq3Fm/Wem/Czpj941W9bTsvGwAe9pOAzKFZapVWcty3sFg2+sbQtfepSJ68Asvdc4gF1JHkZDwKSbDltyjGuAbePSG7HRNlhwRKmP+ZycTSO+4d/g8MdvUbpmi4JC4UxHZuYaNnDrBFcyXK3Be1PCYZgTExE0jxMNu9Cw99yrYD6VcHH/S2ANvbd226wdC1nzoDR6I67viK3crRj8pMkr/GglSezI/YlEIWzy19DkULiPSCd7nnOgFh9MKEdmhD0X3GbOkVUaMK3Nq3eK7wLZu2A9SyFp6/7nh/eHs+3oIOs1F2IJlJObwup63eo/xBwLL4wZ7zubHr3f47itfUPiR3eComiitUEQ+85eH+eVrlqnnD4t3UQ1415scyffAIhG62yR+4qJ/4PCmItH3luxvu8Y2yJb7Oh5RSpOmgro8TE8=
+  provider: pypi
+  user: tartavull
