@@ -31,29 +31,5 @@ Some ideas we were talking about:
     4) Not connecting is more powerful than connecting. This provides regularization.
 
 
-### Something I wrote long time ago and I've no idea what it means
-one example is show at a time in this case we only have two examples
-
-[1, 0, 0, 0] -> 0
-[0, 1, 0, 0] -> 1
-
-the input layer has no effect into it.
-the fullyConnectedLayer which has 2 cols and 4 rows of a weight matrix of rand number within 5 and 15.
-
-[[14.09    11.22]
- [12.42    9.15 ]
- [8.7      12.44]
- [15.      5.54 ]]
-
-when the first example is shown, the values [14.09 11.22] will be the sum for the first and the second neuron to fire.
-
-if only one neuron fires , it is an easy case:
-if the result is right we have a positive reward, otherwise a negative.
-
-if no neuron fires, we should increment all weights by a constant to make the net more active. or do nothing.
-
-if two or more neuron fires at the same time we should have a negative reward for one of them.
-
-
 Credits
 ---------
