@@ -15,7 +15,8 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-   "tqdm>=3.7.1",
+    "tqdm>=3.7.1",
+    "numpy",
     "scikit-learn>=0.17",
     "sklearn>=0.0",
     "scipy>=0.17.0"

@@ -6,7 +6,7 @@ from logger import *
 
 class Trainer:
 
-	def __init__( self , nn , dataset , log , moving_average_window = 100 , positive_reward = .01 , negative_reward = -.1):
+	def __init__( self , nn , dataset , log , moving_average_window = 100 , positive_reward = .01 , negative_reward = -.02):
 
 		self.nn = nn
 		self.dataset = dataset
@@ -29,7 +29,7 @@ class Trainer:
 
 	def train (self, epochs ):
 
-		for epoch in tqdm(range(epochs)):
+		for epoch in tqdm(range(epochs), mininterval=5.0):
 
 			for example in range( self.number_of_examples ):
 
@@ -107,3 +107,5 @@ class Trainer:
 			print 'label ', label , ' % correct predictions ', self.ma_success_rate[label].mean
 
 		print classification_report (self.desiredTargets, self.actualTargets)
+		from sklearn.metrics import confusion_matrix
+		print confusion_matrix (self.desiredTargets, self.actualTargets )

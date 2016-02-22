@@ -61,10 +61,10 @@ def load_dictionary():
 
 def load_naive():
     
-    dictionary = numpy.zeros(4, dtype='u1, (4,)u1')
-    dictionary[:] = [(0,[1, 0, 0, 0]),
-                     (1,[0, 1, 0, 0]),
-                     (2,[0, 0, 1, 0]),
-                     (3,[0, 0, 0, 1])]
+    dictionary = numpy.zeros(4, dtype='u1, (6,)u1')
+    dictionary[:] = [(0,[1, 0, 0, 1, 1, 1]),
+                     (1,[0, 1, 0, 0, 1, 1]),
+                     (2,[0, 0, 1, 0, 1, 1]),
+                     (3,[0, 0, 1, 1, 1, 1])]
     return dictionary
 

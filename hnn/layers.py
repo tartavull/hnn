@@ -39,8 +39,9 @@ class fullyConectedLayer:
 		self.input_len = input_len
 		self.layer_len = layer_len
 
-		#This atribute is explained in the backward method
-		self.max_weight = 2000.0
+		#This atribute is explained in the backward 
+		#if max weight is too large  the exponential  to overflow
+		self.max_weight = 100.0
 		self.min_weight = 0.0
 		self.mid_weight = (self.max_weight - self.min_weight) / 2.0
 
@@ -50,11 +51,11 @@ class fullyConectedLayer:
 		#Excitatory weights describes the probability that a neuron in this layer will fired
 		#given that an input neuron layered fired.
 		self.excitatory = numpy.random.uniform(self.mid_weight * 0.1 , self.mid_weight * 0.2 ,size=(self.input_len, self.layer_len))
-
-		#Inhibitory weights connect neurons from within this layers.
-		#This inhibitory acts as a competition between neurons in the layer.
-		#self.inhibitory = numpy.random.uniform(5.0,5.0,size=(self.layer_len,self.layer_len))
-
+		#
+		# self.excitatory = numpy.array([[ 5100., -1000., -1000., -1000., -1000., -1000.],
+		# 															 [-1000.,  5100., -1000., -1000., -1000., -1000.],
+		# 															 [-1000., -1000.,  5100., -1000., -1000., -1000.],
+		# 															 [-1000., -1000., -1000.,  5100., -1000., -1000.]]).transpose()
 	def forward(self, input):
 
 		self.input = input
@@ -64,18 +65,11 @@ class fullyConectedLayer:
 		#this is then consider as the probabillity of firing, base on this
 		#We randomly make it fired.
 
-		output_ex = numpy.dot(input, self.excitatory) - self.mid_weight
+		output = numpy.dot(self.input, self.excitatory) - self.mid_weight
 
-		#Inhibitory weights makes neurons which large output inhibit other neurons.
-		#Making them less probable to spike
-		#output_inh = numpy.dot(output_ex, self.inhibitory ) - self.mid_weight
-		output_inh = 0
-
-		#We  sum both, the excitatory and inhibitory behaviors to get the final output
-		output = output_ex - output_inh
-
-		#Tempeature makes the output smaller, make the probability closer to 0.5
-		#being 0.5 the value where the variance is larger.
+		#larger tempeature makes the output smaller, 
+		#making the probability of firing closer to 0.5, 
+		#point where the variance is larger.
 		#This makes our network have a more random behavior, which is good for 
 		#exploring possible solutions. 
 		#Temperature should drop to 1.0 as trainning progress.
@@ -89,22 +83,23 @@ class fullyConectedLayer:
 		#Otherwise, is unprobable it will spike.
 		self.spiked = random < probabillity
 
-		spiked = numpy.where(self.spiked == True)[0]
+	
 
-		#There were no spikes, return a random label
+		spiked = numpy.where(self.spiked == True)[0]
 		if spiked.shape[0] == 0:
-			self.excitatory += (self.max_weight - self.excitatory) * 0.1
+			#self.excitatory += (self.max_weight - self.excitatory) * 0.1
+			random_pick = numpy.random.randint(0, self.layer_len)
+			self.spiked[random_pick] = True
 
 		if spiked.shape[0] > 1:
-			random_pick = numpy.random.randint(0, spiked.shape[0])
+			random_pick = spiked[ numpy.random.randint(0, spiked.shape[0]) ]
 			self.spiked = numpy.zeros( shape= (self.layer_len))
 			self.spiked[random_pick] = True
 
 
 		return self.spiked
 
-	def backward(self, reward): #TODO update the inhibitory
-
+	def backward(self, reward): 
 		#If the reward it positive in means the neuron which spiked made a good job.
 		#and the strength of the weights of the neurons which spiked should be increased.
 		#the change in the weights gets smaller, the closer it gets to the limits
@@ -116,23 +111,19 @@ class fullyConectedLayer:
 			#We want to increase the strength of the weight which connects the spiked input cells to the spiked output cells.
 			#We call this weights active_weights
 			active_weights = self.input[:, None] * self.spiked
-			self.excitatory += (self.max_weight - self.excitatory) * reward * active_weights
+
+			self.excitatory += (self.max_weight - numpy.sum( self.excitatory , axis=0)[None, :]) * reward * active_weights
 
 			#We also want to decrease the strenght of the weight which connects to neurons which fired in the input 
 			#to neurons which didn't fired in the output
 			inactive_weights =  self.input[:, None] * (self.spiked == False)
-			self.excitatory -= (self.excitatory - self.min_weight) * reward * inactive_weights
-		
-			#When updating the inhibitory weight, we want neurons which succesfully inhibited other neurons to increase it weights,
-			#To make it more probable that it will inhibit them again, but also, we want to decrease weight between neurons which 
-			#couldn't inhibit each other.
-
+			self.excitatory -= (self.excitatory + numpy.sum( self.excitatory , axis=0)[None, :]) * reward * inactive_weights
 
 		if reward < 0.0:
 			#If the reward it's negative, we want to make the weights responsable of firing smaller.We do this proportional to 
 			#the difference to the mimun weight and to the reward
 			active_weights = self.input[:, None] * self.spiked
-			self.excitatory += ( self.excitatory - self.min_weight ) * reward * active_weights
+			self.excitatory += ( self.excitatory + numpy.sum( self.excitatory , axis=0)[None, :]) * reward * active_weights
 			#self.excitatory =  self.excitatory + (self.max_weight - self.excitatory) * (-1 * reward)  * self.input[:, None] * (self.spiked == False)
 
 		return
